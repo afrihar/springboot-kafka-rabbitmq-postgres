@@ -14,8 +14,11 @@ import java.util.List;
 @Component
 public class KafkaConsumer {
 
-  @Autowired
-  private UserRepository userRepository;
+  private final UserRepository userRepository;
+
+  public KafkaConsumer(UserRepository userRepository) {
+    this.userRepository = userRepository;
+  }
 
   @KafkaListener(topics = "userTopic", groupId = "group_id")
   public void consume(String message) throws IOException {

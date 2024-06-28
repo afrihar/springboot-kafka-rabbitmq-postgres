@@ -7,8 +7,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class RabbitMQProducer {
 
-  @Autowired
-  private RabbitTemplate rabbitTemplate;
+  private final RabbitTemplate rabbitTemplate;
+
+  public RabbitMQProducer(RabbitTemplate rabbitTemplate) {
+    this.rabbitTemplate = rabbitTemplate;
+  }
 
   public void sendMessage(String queueName, String message) {
     rabbitTemplate.convertAndSend(queueName, message);

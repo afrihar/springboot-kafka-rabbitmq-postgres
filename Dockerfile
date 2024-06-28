@@ -12,6 +12,6 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Second stage: Prepare the runtime environment
-FROM tomcat
+FROM tomcat:latest
 
 COPY --from=builder /app/target/*.war /usr/local/tomcat/webapps/ROOT.war

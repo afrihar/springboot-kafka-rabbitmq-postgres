@@ -17,14 +17,17 @@ import java.util.Optional;
 @RequestMapping("/users")
 public class UserController {
 
-  @Autowired
-  private KafkaProducer kafkaProducer;
+  private final KafkaProducer kafkaProducer;
 
-  @Autowired
-  private RabbitMQProducer rabbitMQProducer;
+  private final RabbitMQProducer rabbitMQProducer;
 
-  @Autowired
-  private UserRepository userRepository;
+  private final UserRepository userRepository;
+
+  public UserController(KafkaProducer kafkaProducer, RabbitMQProducer rabbitMQProducer, UserRepository userRepository) {
+    this.kafkaProducer = kafkaProducer;
+    this.rabbitMQProducer = rabbitMQProducer;
+    this.userRepository = userRepository;
+  }
 
   @PostMapping
   public ResponseEntity<String> createUser(@RequestBody List<User> users) throws JsonProcessingException {
