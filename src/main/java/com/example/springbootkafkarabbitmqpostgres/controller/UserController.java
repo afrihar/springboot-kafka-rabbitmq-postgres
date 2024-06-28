@@ -48,6 +48,12 @@ public class UserController {
     return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
   }
 
+  @GetMapping
+  public ResponseEntity<List<User>> getUsers() {
+    List<User> users = userRepository.findAll();
+    return ResponseEntity.ok(users);
+  }
+
   @PutMapping("/{id}")
   public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
     Optional<User> optionalUser = userRepository.findById(id);
