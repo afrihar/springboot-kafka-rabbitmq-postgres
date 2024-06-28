@@ -4,7 +4,6 @@ import com.example.springbootkafkarabbitmqpostgres.entity.User;
 import com.example.springbootkafkarabbitmqpostgres.repo.UserRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +22,8 @@ public class KafkaConsumer {
   @KafkaListener(topics = "userTopic", groupId = "group_id")
   public void consume(String message) throws IOException {
     ObjectMapper objectMapper = new ObjectMapper();
-    List<User> users = objectMapper.readValue(message, new TypeReference<List<User>>() {});
+    List<User> users = objectMapper.readValue(message, new TypeReference<>() {
+    });
     userRepository.saveAll(users);
   }
 }
