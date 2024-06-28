@@ -6,7 +6,9 @@ import com.example.springbootkafkarabbitmqpostgres.service.KafkaProducer;
 import com.example.springbootkafkarabbitmqpostgres.service.RabbitMQProducer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,10 +24,13 @@ public class UserController {
 
   private final UserRepository userRepository;
 
-  public UserController(KafkaProducer kafkaProducer, RabbitMQProducer rabbitMQProducer, UserRepository userRepository) {
+  private final KafkaTemplate<String, String> kafkaTemplate;
+
+  public UserController(KafkaProducer kafkaProducer, RabbitMQProducer rabbitMQProducer, UserRepository userRepository, KafkaTemplate<String, String> kafkaTemplate) {
     this.kafkaProducer = kafkaProducer;
     this.rabbitMQProducer = rabbitMQProducer;
     this.userRepository = userRepository;
+    this.kafkaTemplate = kafkaTemplate;
   }
 
   @PostMapping
@@ -34,7 +39,7 @@ public class UserController {
     String message = objectMapper.writeValueAsString(users);
 
     // Publish to Kafka
-    kafkaProducer.sendMessage("userTopic", message);
+    kafkaProducer.sendMessage("userCreate", message);
 
     // Send success message to RabbitMQ
     rabbitMQProducer.sendMessage("userQueue", "User creation received by Kafka");
@@ -58,11 +63,8 @@ public class UserController {
   public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
     Optional<User> optionalUser = userRepository.findById(id);
     if (optionalUser.isPresent()) {
-      User user = optionalUser.get();
-      user.setName(userDetails.getName());
-      user.setEmail(userDetails.getEmail());
-      userRepository.save(user);
-      return ResponseEntity.ok(user);
+      kafkaTemplate.send("userUpdate", "update," + id + "," + userDetails.getName() + "," + userDetails.getEmail());
+      return ResponseEntity.ok(optionalUser.get());
     } else {
       return ResponseEntity.notFound().build();
     }
@@ -72,7 +74,7 @@ public class UserController {
   public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
     Optional<User> optionalUser = userRepository.findById(id);
     if (optionalUser.isPresent()) {
-      userRepository.deleteById(id);
+      kafkaTemplate.send("userUpdate", "delete," + id);
       return ResponseEntity.noContent().build();
     } else {
       return ResponseEntity.notFound().build();
