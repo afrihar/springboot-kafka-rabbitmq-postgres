@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Creation Status</title>
+</head>
+<body>
+<div id="status">Awaiting user creation status...</div>
+
+<script>
+  // Update the URL to point to the backend server's SSE endpoint
+  const eventSource = new EventSource('http://localhost:8080/events');
+
+  eventSource.onmessage = function(event) {
+    document.getElementById('status').innerText = event.data;
+  };
+
+  eventSource.onerror = function(event) {
+    console.error('EventSource failed:', event);
+  };
+</script>
+</body>
+</html>
